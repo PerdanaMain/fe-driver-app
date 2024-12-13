@@ -1,7 +1,7 @@
 // app/api/auth/[...nextauth]/route.js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { apiUrl } from "../../../lib/config";
+import { apiUrl } from "../../../../lib/config";
 
 const handler = NextAuth({
   providers: [
