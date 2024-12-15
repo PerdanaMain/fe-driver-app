@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
 import { ClientProvider } from "../components/client-provider";
-
-const inter = Inter({ subsets: ["latin"] });
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Auth App",
+  title: "Driver App",
   description: "Authentication with NextAuth.js",
 };
 
@@ -17,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className='min-h-screen bg-gray-100 p-8'>
         <ClientProvider>{children}</ClientProvider>
       </body>
     </html>
