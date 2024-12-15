@@ -14,9 +14,10 @@ import {
 } from "@nextui-org/react";
 
 import { Sender } from "@/types/sender";
+import Create from "./senders/create";
 
 const SenderContent = ({ senderData }: { senderData: Sender }) => {
-  const rows = senderData.map((item, index) => {
+  const rows: any = senderData.map((item, index) => {
     return {
       ...item,
       key: index + 1,
@@ -42,8 +43,9 @@ const SenderContent = ({ senderData }: { senderData: Sender }) => {
       <Navbar />
       <div className="grid grid-rows-3 grid-flow-col gap-4 mt-4">
         <Sidebar />
-        <div className="col-span-6 bg-white rounded-xl shadow py-3 px-5">
-          <Table aria-label="Example table with dynamic content">
+        <div className="col-span-6 py-3 px-5">
+          <Create/>
+          <Table aria-label="Example table with dynamic content" className="mt-5">
             <TableHeader columns={columns} className="text-left">
               {(column) => (
                 <TableColumn key={column.key}>{column.label}</TableColumn>
