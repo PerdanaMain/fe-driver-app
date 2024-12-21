@@ -24,34 +24,19 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
   const [receiverAddress, setReceiverAddress] = useState<string>("");
   const [receiverLatitude, setReceiverLatitude] = useState<string>("");
   const [receiverLongitude, setReceiverLongitude] = useState<string>("");
-  const [sender, setSender] = useState<Set<string>>(new Set([]));
+
+  const [senderName, setSenderName] = useState<string>("");
+  const [senderPhone, setSenderPhone] = useState<string>("");
+  const [senderAddress, setSenderAddress] = useState<string>("");
+  const [senderLatitude, setSenderLatitude] = useState<string>("");
+  const [senderLongitude, setSenderLongitude] = useState<string>("");
+
   const [error, setError] = useState<string>("");
 
   const token = session?.user?.token ?? null;
-  const selectData = useMemo(
-    () =>
-      senderData.map((item) => ({
-        key: item.id,
-        label: `${item.name} - ${item.address}`,
-      })),
-    [senderData]
-  );
 
   const submitHandler = async (e: any) => {
     try {
-      // Dapatkan sender ID dari Set
-      const selectedSenderId = Array.from(sender)[0];
-
-      // Validasi input
-      if (
-        !selectedSenderId ||
-        !receiverName ||
-        !receiverPhone ||
-        !receiverAddress
-      ) {
-        throw new Error("Please fill all required fields");
-      }
-
       const res = await fetch(`${apiUrl.apiUrl}/packages`, {
         method: "POST",
         headers: {
@@ -59,12 +44,17 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          senderId: selectedSenderId,
           receiverName: receiverName,
           receiverPhone: receiverPhone,
           receiverAddress: receiverAddress,
           receiverLatitude: receiverLatitude || null,
           receiverLongitude: receiverLongitude || null,
+
+          senderName: senderName,
+          senderPhone: senderPhone,
+          senderAddress: senderAddress,
+          senderLatitude: senderLatitude || null,
+          senderLongitude: senderLongitude || null,
         }),
       });
 
@@ -82,7 +72,12 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
       setReceiverAddress("");
       setReceiverLatitude("");
       setReceiverLongitude("");
-      setSender(new Set([]));
+
+      setSenderName("");
+      setSenderPhone("");
+      setSenderAddress("");
+      setSenderLatitude("");
+      setSenderLongitude("");
     } catch (error: any) {
       console.error("Error creating package:", error);
       setError(error.message);
@@ -94,7 +89,12 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
       <Button color="primary" onPress={onOpen}>
         Add New Package
       </Button>
-      <Modal isOpen={isOpen} placement="top-center" onOpenChange={onOpenChange}>
+      <Modal
+        isOpen={isOpen}
+        placement="top-center"
+        onOpenChange={onOpenChange}
+        size="xl"
+      >
         <ModalContent>
           {(onClose) => (
             <form onSubmit={submitHandler}>
@@ -102,61 +102,106 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
                 Create Package
               </ModalHeader>
               <ModalBody>
-                <Input
-                  label="Name"
-                  placeholder="Enter The Name"
-                  variant="bordered"
-                  type="text"
-                  value={receiverName}
-                  onChange={(e: any) => setReceiverName(e.target.value)}
-                />
+                <div className="grid grid-cols-2 gap-2">
+                  <div id="receiver-side">
+                    <Input
+                      className="mb-2"
+                      label="Receiver Name"
+                      placeholder="Enter The Name"
+                      variant="bordered"
+                      type="text"
+                      value={receiverName}
+                      onChange={(e: any) => setReceiverName(e.target.value)}
+                    />
 
-                <Select
-                  label="Select Sender"
-                  placeholder="Select a sender"
-                  selectedKeys={sender}
-                  className="w-full"
-                  onSelectionChange={(keys) => setSender(keys as Set<string>)}
-                >
-                  {selectData.map((sender) => (
-                    <SelectItem key={sender.key} value={sender.key}>
-                      {sender.label}
-                    </SelectItem>
-                  ))}
-                </Select>
+                    <Input
+                      className="mb-2"
+                      label="Receiver Address"
+                      placeholder="Enter The Address"
+                      variant="bordered"
+                      type="text"
+                      value={receiverAddress}
+                      onChange={(e: any) => setReceiverAddress(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Receiver Phone"
+                      placeholder="Enter The Phone"
+                      variant="bordered"
+                      type="text"
+                      value={receiverPhone}
+                      onChange={(e: any) => setReceiverPhone(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Receiver Latitude"
+                      placeholder="Enter The Latitude"
+                      variant="bordered"
+                      type="text"
+                      value={receiverLatitude}
+                      onChange={(e: any) => setReceiverLatitude(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Receiver Longitude"
+                      placeholder="Enter The Longitude"
+                      variant="bordered"
+                      type="text"
+                      value={receiverLongitude}
+                      onChange={(e: any) =>
+                        setReceiverLongitude(e.target.value)
+                      }
+                    />
+                  </div>
+                  <div id="sender-side">
+                    <Input
+                      className="mb-2"
+                      label="Sender Name"
+                      placeholder="Enter The Name"
+                      variant="bordered"
+                      type="text"
+                      value={senderName}
+                      onChange={(e: any) => setSenderName(e.target.value)}
+                    />
 
-                <Input
-                  label="Address"
-                  placeholder="Enter The Address"
-                  variant="bordered"
-                  type="text"
-                  value={receiverAddress}
-                  onChange={(e: any) => setReceiverAddress(e.target.value)}
-                />
-                <Input
-                  label="Phone"
-                  placeholder="Enter The Phone"
-                  variant="bordered"
-                  type="text"
-                  value={receiverPhone}
-                  onChange={(e: any) => setReceiverPhone(e.target.value)}
-                />
-                <Input
-                  label="Latitude"
-                  placeholder="Enter The Latitude"
-                  variant="bordered"
-                  type="text"
-                  value={receiverLatitude}
-                  onChange={(e: any) => setReceiverLatitude(e.target.value)}
-                />
-                <Input
-                  label="Longitude"
-                  placeholder="Enter The Longitude"
-                  variant="bordered"
-                  type="text"
-                  value={receiverLongitude}
-                  onChange={(e: any) => setReceiverLongitude(e.target.value)}
-                />
+                    <Input
+                      className="mb-2"
+                      label="Sender Address"
+                      placeholder="Enter The Address"
+                      variant="bordered"
+                      type="text"
+                      value={senderAddress}
+                      onChange={(e: any) => setSenderAddress(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Sender Phone"
+                      placeholder="Enter The Phone"
+                      variant="bordered"
+                      type="text"
+                      value={senderPhone}
+                      onChange={(e: any) => setSenderPhone(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Sender Latitude"
+                      placeholder="Enter The Latitude"
+                      variant="bordered"
+                      type="text"
+                      value={senderLatitude}
+                      onChange={(e: any) => setSenderLatitude(e.target.value)}
+                    />
+                    <Input
+                      className="mb-2"
+                      label="Sender Longitude"
+                      placeholder="Enter The Longitude"
+                      variant="bordered"
+                      type="text"
+                      value={senderLongitude}
+                      onChange={(e: any) => setSenderLongitude(e.target.value)}
+                    />
+                  </div>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="flat" onPress={onClose}>

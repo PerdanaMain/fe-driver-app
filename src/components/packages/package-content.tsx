@@ -8,20 +8,22 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Tooltip,
 } from "@nextui-org/react";
 import { Sender } from "@/types/sender";
 import { useCallback } from "react";
 import AddModal from "./add-modal";
+import { DeleteIcon, EditIcon, EyeIcon } from "lucide-react";
 
 interface Package {
   id: number;
-  Receiver: {
+  receiver: {
     id: number;
     name: string;
     phone: string;
     address: string;
   };
-  Sender: {
+  sender: {
     id: number;
     name: string;
     phone: string;
@@ -44,13 +46,33 @@ const PackageContent = ({
   const renderCell = useCallback((item: Package, columnKey: string) => {
     switch (columnKey) {
       case "name":
-        return item.Receiver?.name || "-";
+        return item.receiver?.name || "-";
       case "phone":
-        return item.Receiver?.phone || "-";
+        return item.receiver?.phone || "-";
       case "address":
-        return item.Receiver?.address || "-";
+        return item.receiver?.address || "-";
       case "sender":
-        return item.Sender?.name || "-";
+        return item.sender?.name || "-";
+      case "actions":
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="Details">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <EyeIcon />
+              </span>
+            </Tooltip>
+            <Tooltip content="Edit user">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <EditIcon />
+              </span>
+            </Tooltip>
+            <Tooltip color="danger" content="Delete user">
+              <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                <DeleteIcon />
+              </span>
+            </Tooltip>
+          </div>
+        );
       default:
         return "-";
     }
@@ -73,6 +95,10 @@ const PackageContent = ({
       key: "sender",
       label: "Sender Name",
     },
+    {
+      key: "actions",
+      label: "Actions",
+    },
   ];
 
   return (
@@ -82,10 +108,7 @@ const PackageContent = ({
         <Sidebar />
         <div className="col-span-6 py-3 px-5">
           <AddModal senderData={senderData} />
-          <Table 
-            aria-label="Package table" 
-            className="mt-5"
-          >
+          <Table aria-label="Package table" className="mt-5">
             <TableHeader columns={columns}>
               {(column) => (
                 <TableColumn key={column.key}>{column.label}</TableColumn>
