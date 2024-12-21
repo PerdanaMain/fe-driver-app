@@ -1,35 +1,24 @@
 "use client";
-import Navbar from "../navbar";
-import Sidebar from "../sidebar";
+import { Sender } from "@/types/sender";
 import {
   Table,
-  TableHeader,
-  TableColumn,
   TableBody,
-  TableRow,
   TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
   Tooltip,
 } from "@nextui-org/react";
-import { Sender } from "@/types/sender";
-import { useCallback } from "react";
-import AddModal from "./add-modal";
 import { DeleteIcon, EditIcon, EyeIcon } from "lucide-react";
-
-interface Package {
-  id: number;
-  receiver: {
-    id: number;
-    name: string;
-    phone: string;
-    address: string;
-  };
-  sender: {
-    id: number;
-    name: string;
-    phone: string;
-    address: string;
-  };
-}
+import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import Navbar from "../navbar";
+import Sidebar from "../sidebar";
+import AddModal from "./add-modal";
+import Swal from "sweetalert2";
+import apiUrl from "@/lib/api-url";
+import { Package } from "@/types/package";
+import UpdateModal from "./update-modal";
 
 const PackageContent = ({
   packageData,
@@ -42,6 +31,9 @@ const PackageContent = ({
     ...item,
     key: item.id || index + 1,
   }));
+
+  const [error, setError] = useState<String>("");
+  const router = useRouter();
 
   const renderCell = useCallback((item: Package, columnKey: string) => {
     switch (columnKey) {
@@ -56,20 +48,22 @@ const PackageContent = ({
       case "actions":
         return (
           <div className="relative flex items-center gap-2">
-            <Tooltip content="Details">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+            <Tooltip content="Details" color="primary">
+              <span className="text-lg text-primary-400 cursor-pointer active:opacity-50">
                 <EyeIcon />
               </span>
             </Tooltip>
-            <Tooltip content="Edit user">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon />
-              </span>
-            </Tooltip>
+
+            <UpdateModal pkg={item} />
+
             <Tooltip color="danger" content="Delete user">
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
+              <button
+                className="text-lg text-danger cursor-pointer active:opacity-50"
+                type="button"
+                onClick={() => deleteHandler(item.id)}
+              >
                 <DeleteIcon />
-              </span>
+              </button>
             </Tooltip>
           </div>
         );
@@ -100,6 +94,43 @@ const PackageContent = ({
       label: "Actions",
     },
   ];
+
+  const deleteHandler = (id: string) => {
+    try {
+      Swal.fire({
+        title: "Deletion confirmation",
+        text: "The delete action can't be undone",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response: any = await fetch(`${apiUrl.apiUrl}/packages/${id}`, {
+            method: "delete",
+          });
+
+          if (response.ok) {
+            return Swal.fire({
+              title: "Packages deleted",
+              text: response.message,
+              icon: "info",
+              showConfirmButton: true,
+            }).then(() => router.refresh);
+          } else {
+            Swal.fire({
+              title: "Error while deleting package",
+              text: response.message,
+              icon: "error",
+            });
+          }
+        }
+      });
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto">

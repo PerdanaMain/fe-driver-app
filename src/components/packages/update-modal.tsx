@@ -1,5 +1,9 @@
+"use client";
+
+import { Package } from "@/types/package";
+import { useState } from "react";
+
 import apiUrl from "@/lib/api-url";
-import { Sender } from "@/types/sender";
 import {
   Button,
   Input,
@@ -8,35 +12,50 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Tooltip,
   useDisclosure,
 } from "@nextui-org/react";
+import { EditIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import Swal from "sweetalert2";
 
-const AddModal = ({ senderData }: { senderData: Sender[] }) => {
+const UpdateModal = ({ pkg }: { pkg: Package }) => {
   const { data: session, status } = useSession();
+  const token = session?.user?.token ?? "";
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [receiverName, setReceiverName] = useState<string>("");
-  const [receiverPhone, setReceiverPhone] = useState<string>("");
-  const [receiverAddress, setReceiverAddress] = useState<string>("");
-  const [receiverLatitude, setReceiverLatitude] = useState<string>("");
-  const [receiverLongitude, setReceiverLongitude] = useState<string>("");
 
-  const [senderName, setSenderName] = useState<string>("");
-  const [senderPhone, setSenderPhone] = useState<string>("");
-  const [senderAddress, setSenderAddress] = useState<string>("");
-  const [senderLatitude, setSenderLatitude] = useState<string>("");
-  const [senderLongitude, setSenderLongitude] = useState<string>("");
+  const [receiverName, setReceiverName] = useState<string>(pkg?.receiver.name);
+  const [receiverPhone, setReceiverPhone] = useState<string>(
+    pkg?.receiver.phone
+  );
+  const [receiverAddress, setReceiverAddress] = useState<string>(
+    pkg?.receiver.address
+  );
+  const [receiverLatitude, setReceiverLatitude] = useState<string>(
+    pkg?.receiver.latitude
+  );
+  const [receiverLongitude, setReceiverLongitude] = useState<string>(
+    pkg?.receiver.longitude
+  );
 
-  const [error, setError] = useState<string>("");
-
-  const token = session?.user?.token ?? null;
+  const [senderName, setSenderName] = useState<string>(pkg?.sender.name);
+  const [senderPhone, setSenderPhone] = useState<string>(pkg?.sender.phone);
+  const [senderAddress, setSenderAddress] = useState<string>(
+    pkg?.sender.address
+  );
+  const [senderLatitude, setSenderLatitude] = useState<string>(
+    pkg?.sender.latitude
+  );
+  const [senderLongitude, setSenderLongitude] = useState<string>(
+    pkg?.sender.longitude
+  );
 
   const submitHandler = async (e: any) => {
+    e.prefentDefault();
     try {
-      const res = await fetch(`${apiUrl.apiUrl}/packages`, {
-        method: "POST",
+      const response = await fetch(`${apiUrl.apiUrl}/packages/${pkg.id}`, {
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -56,37 +75,39 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
         }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create package");
+      if (response.ok) {
+        Swal.fire({
+          title: "Package updated!",
+          text: "Package Updated Successfully",
+          icon: "info",
+        });
+      } else {
+        Swal.fire({
+          title: "Package Not Updated!",
+          text: "Sorry, Error while updating package",
+          icon: "error",
+        });
       }
-
-      const data = await res.json();
-      console.log("Package created:", data);
-
-      // Reset form
-      setReceiverName("");
-      setReceiverPhone("");
-      setReceiverAddress("");
-      setReceiverLatitude("");
-      setReceiverLongitude("");
-
-      setSenderName("");
-      setSenderPhone("");
-      setSenderAddress("");
-      setSenderLatitude("");
-      setSenderLongitude("");
     } catch (error: any) {
-      console.error("Error creating package:", error);
-      setError(error.message);
+      Swal.fire({
+        title: "Sorry, Error while updating package",
+        text: error.message,
+        icon: "error",
+      });
     }
   };
-
   return (
     <>
-      <Button color="primary" onPress={onOpen}>
-        Add New Package
-      </Button>
+      <Tooltip content="Edit user" color="warning">
+        <Button
+          className="bg-transparent"
+          size="sm"
+          color="warning"
+          onPress={onOpen}
+          startContent={<EditIcon />}
+        ></Button>
+      </Tooltip>
+
       <Modal
         isOpen={isOpen}
         placement="top-center"
@@ -95,9 +116,9 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
       >
         <ModalContent>
           {(onClose) => (
-            <form onSubmit={submitHandler}>
+            <form onSubmit={(e) => submitHandler(e)}>
               <ModalHeader className="flex flex-col gap-1">
-                Create Package
+                Update Package
               </ModalHeader>
               <ModalBody>
                 <div className="grid grid-cols-2 gap-2">
@@ -217,4 +238,4 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
   );
 };
 
-export default AddModal;
+export default UpdateModal;
