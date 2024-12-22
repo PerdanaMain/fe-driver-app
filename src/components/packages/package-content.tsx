@@ -1,6 +1,7 @@
 "use client";
 import { Sender } from "@/types/sender";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
@@ -49,7 +50,7 @@ const PackageContent = ({
       case "actions":
         return (
           <div className="relative flex items-center gap-2">
-            <DetailModal pkg={item}/>
+            <DetailModal pkg={item} />
             <UpdateModal pkg={item} />
             <Tooltip color="danger" content="Delete user">
               <button
@@ -127,6 +128,46 @@ const PackageContent = ({
     }
   };
 
+  const deleteAllHandler = async () => {
+    try {
+      Swal.fire({
+        title: "Deletion confirmation",
+        text: "The delete action can't be undone",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response: any = await fetch(`${apiUrl.apiUrl}/packages/`, {
+            method: "delete",
+          });
+          if (response.ok) {
+            return Swal.fire({
+              title: "Packages deleted",
+              text: response.message,
+              icon: "info",
+              showConfirmButton: true,
+            }).then(() => router.refresh);
+          } else {
+            Swal.fire({
+              title: "Error while deleting package",
+              text: response.message,
+              icon: "error",
+            });
+          }
+        }
+      });
+    } catch (error: any) {
+      Swal.fire({
+        title: "Error while deleting packages",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <Navbar />
@@ -134,6 +175,10 @@ const PackageContent = ({
         <Sidebar />
         <div className="col-span-6 py-3 px-5">
           <AddModal senderData={senderData} />
+
+          <Button color="warning" className="ms-3" onPress={deleteAllHandler}>
+            Delete All Packages
+          </Button>
           <Table aria-label="Package table" className="mt-5">
             <TableHeader columns={columns}>
               {(column) => (

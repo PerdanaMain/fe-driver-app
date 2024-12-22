@@ -12,6 +12,7 @@ import {
 } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 const AddModal = ({ senderData }: { senderData: Sender[] }) => {
   const { data: session, status } = useSession();
@@ -35,19 +36,18 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
 
   const submitHandler = async (e: any) => {
     try {
-      const res = await fetch(`${apiUrl.apiUrl}/packages`, {
+      const res: any = await fetch(`${apiUrl.apiUrl}/packages`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        // headers: {
+        //   Authorization: `Bearer ${token}`,
+        //   "Content-Type": "application/json",
+        // },
         body: JSON.stringify({
           receiverName: receiverName,
           receiverPhone: receiverPhone,
           receiverAddress: receiverAddress,
           receiverLatitude: receiverLatitude || null,
           receiverLongitude: receiverLongitude || null,
-
           senderName: senderName,
           senderPhone: senderPhone,
           senderAddress: senderAddress,
@@ -56,9 +56,19 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
         }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create package");
+      if (res.ok) {
+        return Swal.fire({
+          title: "Packages deleted",
+          text: res.message,
+          icon: "info",
+          showConfirmButton: true,
+        })
+      } else {
+        Swal.fire({
+          title: "Error while deleting package",
+          text: res.message,
+          icon: "error",
+        });
       }
 
       const data = await res.json();
@@ -77,8 +87,11 @@ const AddModal = ({ senderData }: { senderData: Sender[] }) => {
       setSenderLatitude("");
       setSenderLongitude("");
     } catch (error: any) {
-      console.error("Error creating package:", error);
-      setError(error.message);
+      Swal.fire({
+        title: "Error while deleting packages",
+        text: error.message,
+        icon: "error",
+      });
     }
   };
 
