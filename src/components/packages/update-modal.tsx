@@ -98,7 +98,7 @@ const UpdateModal = ({ pkg }: { pkg: Package }) => {
   };
   return (
     <>
-      <Tooltip content="Edit user" color="warning">
+      <Tooltip content="Edit Package" color="warning">
         <Button
           className="bg-transparent"
           size="sm"

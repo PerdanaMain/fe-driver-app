@@ -19,6 +19,7 @@ import Swal from "sweetalert2";
 import apiUrl from "@/lib/api-url";
 import { Package } from "@/types/package";
 import UpdateModal from "./update-modal";
+import DetailModal from "./detail-modal";
 
 const PackageContent = ({
   packageData,
@@ -48,14 +49,8 @@ const PackageContent = ({
       case "actions":
         return (
           <div className="relative flex items-center gap-2">
-            <Tooltip content="Details" color="primary">
-              <span className="text-lg text-primary-400 cursor-pointer active:opacity-50">
-                <EyeIcon />
-              </span>
-            </Tooltip>
-
+            <DetailModal pkg={item}/>
             <UpdateModal pkg={item} />
-
             <Tooltip color="danger" content="Delete user">
               <button
                 className="text-lg text-danger cursor-pointer active:opacity-50"
