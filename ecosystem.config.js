@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "driver-app",
+      name: "fe-driver-app",
       script: "node_modules/next/dist/bin/next", // Points to Next.js start script
       args: "start", // Command to start Next.js in production mode
       instances: 1, // Use 'max' to scale based on CPU cores
